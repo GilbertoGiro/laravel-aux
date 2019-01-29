@@ -1,0 +1,372 @@
+<?php
+
+namespace App\Services;
+
+use App\Repository\BaseRepository;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
+
+abstract class BaseService
+{
+    /**
+     * @var BaseRepository
+     */
+    protected $repository;
+
+    /**
+     * @var Request
+     */
+    protected $request;
+
+    /**
+     * @var array
+     */
+    protected $result;
+
+    /**
+     * @var array
+     */
+    protected $return;
+
+    /**
+     * @var array
+     */
+    protected $filtersOrder = [
+        'query',
+        'whereNull',
+        'whereNotNull',
+        'with',
+        'withNotEmpty',
+        'withEmpty',
+        'orderByAsc',
+        'orderByDesc',
+        'paginated',
+        'groupBy'
+    ];
+
+    /**
+     * Filter constructor.
+     *
+     * @param BaseRepository $repository
+     */
+    protected function __construct(BaseRepository $repository)
+    {
+        $this->repository = $repository;
+        $this->filtersOrder = array_merge($this->repository->getFillable(), $this->filtersOrder);
+    }
+
+    /**
+     * Method to get all Model Objects
+     *
+     * @return \Illuminate\Database\Eloquent\Collection|static[]
+     */
+    public function all()
+    {
+        return $this->repository->all();
+    }
+
+    /**
+     * Method to get all records based in Request Information
+     *
+     * @param $columns
+     * @param Request $request
+     * @param string $format
+     * @return \Illuminate\Database\Eloquent\Collection|static[]
+     */
+    public function get($columns, Request $request, $format = 'array')
+    {
+        $this->request = $request;
+        $this->result = $this->repository->select($columns);
+
+        if (empty($this->request->get('paginated'))) {
+            $this->request->merge(['paginated' => true]);
+        }
+
+        if (empty($this->request->get('limit'))) {
+            $this->request->merge(['limit' => 15]);
+        }
+
+        foreach ($this->filtersOrder as $key => $value) {
+            $filter = $this->request->get($value);
+
+            if (method_exists($this, $value) && !empty($filter)) {
+                $this->$value($filter);
+            } else {
+                if ($this->columnExists($value) && array_key_exists($value, $this->request->all())) {
+                    $this->where($value, $filter);
+                }
+            }
+        }
+
+        $array = ($format === 'array') ? $this->result->toArray() : $this->result;
+        $results = (isset($array['data'])) ? $array['data'] : $array;
+
+        $this->return['data'] = (!empty($results['data'])) ? $results['data'] : $results;
+        $this->return['count'] = (empty($request->get('query'))) ? $this->repository->count() : $this->result->count();
+        $this->return['filter'] = $this->result->count();
+
+        return $this->return;
+    }
+
+    /**
+     * Method to find Model Object
+     *
+     * @param $id
+     * @return mixed
+     */
+    public function find($id)
+    {
+        return $this->repository->find($id);
+    }
+
+    /**
+     * Method to get Model Object information
+     *
+     * @param int $id
+     * @return mixed
+     */
+    public function show($id)
+    {
+        return $this->repository->find($id);
+    }
+
+    /**
+     * Method to get Model Object by passed relation of Key => Value
+     *
+     * @param array $data
+     * @return \Illuminate\Database\Eloquent\Collection|static|static[]
+     */
+    public function findBy(array $data)
+    {
+        return $this->repository->findBy($data);
+    }
+
+    /**
+     * Method to create Model Object
+     *
+     * @param array $data
+     * @return array
+     */
+    public function create(array $data)
+    {
+        try {
+            $new = $this->repository->create($data);
+            if ($new) {
+                return ['status' => '00'];
+            }
+            return ['status' => '01', 'message' => 'Não foi possível criar o registro'];
+        } catch (\Exception $e) {
+            Log::debug($e->getMessage());
+            return ['status' => '01', 'message' => 'Não foi possível criar o registro'];
+        }
+    }
+
+    /**
+     * Method to update Model Object
+     *
+     * @param array $data
+     * @param int $id
+     * @return array
+     */
+    public function update(array $data, int $id)
+    {
+        try {
+            $elem = $this->repository->find($id);
+            if ($elem->update($data)) {
+                return ['status' => '00'];
+            }
+            return ['status' => '01', 'message' => 'Não foi possível atualizar o registro'];
+        } catch (\Exception $e) {
+            Log::debug($e->getMessage());
+            return ['status' => '01', 'message' => 'Não foi possível atualizar o registro'];
+        }
+    }
+
+    /**
+     * Method to remove Model Object
+     *
+     * @param $id
+     * @return array
+     * @throws \Exception
+     */
+    public function delete($id)
+    {
+        try {
+            if ($this->repository->delete($id)) {
+                return ['status' => '00'];
+            }
+            return ['status' => '01', 'message' => 'Não foi possível atualizar o registro'];
+        } catch (\Exception $e) {
+            Log::debug($e->getMessage());
+            return ['status' => '01', 'message' => 'Não foi possível atualizar o registro'];
+        }
+    }
+
+    /**
+     * Method to paginate rows
+     *
+     * @param $value
+     */
+    private function paginated($value): void
+    {
+        $value = json_decode($value);
+        if ($value) {
+            $this->result = $this->result->paginate($this->request->get('limit'));
+
+            $this->return['page'] = $this->result->currentPage() - 1;
+            $this->return['pages'] = $this->result->lastPage();
+        } else {
+            $this->result = $this->result->get();
+        }
+    }
+
+    /**
+     * Method to get rows with some associated Table Information
+     *
+     * @param $value
+     * @throws \ReflectionException
+     */
+    private function with($value): void
+    {
+        $this->result = $this->repository->withRelationIfExists($this->result, $value);
+    }
+
+    /**
+     * Method to get rows with some associated Table Information
+     *
+     * @param $value
+     * @throws \ReflectionException
+     */
+    private function withNotEmpty($value): void
+    {
+        $this->result = $this->repository->withRelationIfNotEmpty($this->result, $value);
+    }
+
+    /**
+     * Method to get rows who doesn't have relation (It's empty)
+     *
+     * @param $value
+     * @throws \ReflectionException
+     */
+    private function withEmpty($value): void
+    {
+        $this->result = $this->repository->withRelationEmpty($this->result, $value);
+    }
+
+    /**
+     * Method to Order Rows by passed Columns
+     *
+     * @param array|string $value
+     */
+    private function orderByAsc($value): void
+    {
+        if (is_array($value)) {
+            foreach ($value as $filter) {
+                $this->result = $this->result->orderBy($filter);
+            }
+            return;
+        }
+        $this->result = $this->result->orderBy($value);
+    }
+
+    /**
+     * Method to Order Rows by passed Columns
+     *
+     * @param array|string $value
+     */
+    private function orderByDesc($value): void
+    {
+        if (is_array($value)) {
+            foreach ($value as $filter) {
+                $this->result = $this->result->orderByDesc($filter);
+            }
+            return;
+        }
+        $this->result = $this->result->orderByDesc($value);
+    }
+
+    /**
+     * Method to check if Column Exists in Eloquent Model
+     *
+     * @param $value
+     * @return mixed
+     */
+    private function columnExists($value): bool
+    {
+        return Schema::hasColumn($this->repository->getTable(), $value);
+    }
+
+    /**
+     * Method to get Model Objects by passed Condition
+     *
+     * @param $key
+     * @param $value
+     */
+    private function where($key, $value): void
+    {
+        $this->result = $this->result->where(function ($query) use ($key, $value) {
+            if (is_array($value)) {
+                foreach ($value as $column => $condition) {
+                    $query->whereRaw("LOWER({$key}) LIKE LOWER(?)", '%' . $condition . '%');
+                }
+                return;
+            }
+            if (is_numeric($value)) {
+                $query->where($key, $value);
+            } else {
+                $query->whereRaw("LOWER({$key}) LIKE LOWER(?)", '%' . $value . '%');
+            }
+        });
+    }
+
+    /**
+     * Method to get Model Objects by passed Condition
+     *
+     * @param $key
+     */
+    private function whereNull($key)
+    {
+        $this->result = $this->result->whereNull($key);
+    }
+
+    /**
+     * Method to get Model Objects by passed Condition
+     *
+     * @param $key
+     */
+    private function whereNotNull($key)
+    {
+        $this->result = $this->result->whereNotNull($key);
+    }
+
+    /**
+     * Method to get Model Objects by passed Condition
+     *
+     * @param $value
+     */
+    private function query($value): void
+    {
+        $columns = $this->repository->getFillable();
+        foreach ($columns as $column) {
+            $type = Schema::getColumnType($this->repository->getTable(), $column);
+            if (!in_array($type, ['integer', 'boolean', 'decimal'])) {
+                $this->result = $this->result->orWhereRaw("LOWER({$column})" . ' LIKE ' . "LOWER('%{$value}%')");
+            } else {
+                if (is_numeric($value) || is_bool($value)) {
+                    $this->result = $this->result->orWhere($column, $value);
+                }
+            }
+        }
+    }
+
+    /**
+     * Method to Group Model Objects by passed column
+     *
+     * @param $column
+     */
+    private function groupBy($column): void
+    {
+        $this->result = $this->result->groupBy($column);
+    }
+}
