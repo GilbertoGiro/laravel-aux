@@ -2,7 +2,6 @@
 
 namespace LaravelAux;
 
-use LaravelAux\BaseService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -11,11 +10,6 @@ use Illuminate\Support\Facades\Validator;
 
 abstract class BaseController
 {
-    /**
-     * @var Model
-     */
-    protected $model;
-
     /**
      * @var BaseService
      */
@@ -29,13 +23,11 @@ abstract class BaseController
     /**
      * BaseController constructor.
      *
-     * @param Model $model
      * @param BaseService $service
      * @param FormRequest $request
      */
-    public function __construct(Model $model, BaseService $service, FormRequest $request)
+    public function __construct(BaseService $service, FormRequest $request)
     {
-        $this->model = $model;
         $this->service = $service;
         $this->request = $request;
     }
@@ -60,11 +52,10 @@ abstract class BaseController
     public function store(Request $request)
     {
         $this->validation();
-        $condition = $this->service->create($request->all());
-        if ($condition['status'] === '00') {
-            return response()->json('Registro criado com sucesso', 200);
+        if ($new = $this->service->create($request->all())) {
+            return response()->json($new, 200);
         }
-        return response()->json($condition['message'], 500);
+        return response()->json('Não foi possível adicionar o registro', 500);
     }
 
     /**
@@ -77,11 +68,10 @@ abstract class BaseController
     public function update(Request $request, int $id)
     {
         $this->validation('PUT');
-        $condition = $this->service->update($request->all(), $id);
-        if ($condition['status'] === '00') {
+        if ($this->service->update($request->all(), $id)) {
             return response()->json('Registro atualizado com sucesso', 200);
         }
-        return response()->json($condition['message'], 500);
+        return response()->json('Não foi possível atualizar o registro', 500);
     }
 
     /**

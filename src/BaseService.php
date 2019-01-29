@@ -3,8 +3,6 @@
 namespace LaravelAux;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
-use LaravelAux\BaseRepository;
 use Illuminate\Support\Facades\Schema;
 
 abstract class BaseService
@@ -150,16 +148,7 @@ abstract class BaseService
      */
     public function create(array $data)
     {
-        try {
-            $new = $this->repository->create($data);
-            if ($new) {
-                return ['status' => '00'];
-            }
-            return ['status' => '01', 'message' => 'Não foi possível criar o registro'];
-        } catch (\Exception $e) {
-            Log::debug($e->getMessage());
-            return ['status' => '01', 'message' => 'Não foi possível criar o registro'];
-        }
+        return $this->repository->create($data);
     }
 
     /**
@@ -167,20 +156,12 @@ abstract class BaseService
      *
      * @param array $data
      * @param int $id
-     * @return array
+     * @return bool
      */
     public function update(array $data, int $id)
     {
-        try {
-            $elem = $this->repository->find($id);
-            if ($elem->update($data)) {
-                return ['status' => '00'];
-            }
-            return ['status' => '01', 'message' => 'Não foi possível atualizar o registro'];
-        } catch (\Exception $e) {
-            Log::debug($e->getMessage());
-            return ['status' => '01', 'message' => 'Não foi possível atualizar o registro'];
-        }
+        $elem = $this->repository->find($id);
+        return $elem->update($data);
     }
 
     /**
@@ -192,15 +173,7 @@ abstract class BaseService
      */
     public function delete($id)
     {
-        try {
-            if ($this->repository->delete($id)) {
-                return ['status' => '00'];
-            }
-            return ['status' => '01', 'message' => 'Não foi possível atualizar o registro'];
-        } catch (\Exception $e) {
-            Log::debug($e->getMessage());
-            return ['status' => '01', 'message' => 'Não foi possível atualizar o registro'];
-        }
+        return $this->repository->delete($id);
     }
 
     /**
