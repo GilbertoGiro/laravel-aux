@@ -2,7 +2,7 @@
 
 namespace LaravelAux;
 
-use App\Services\BaseService;
+use LaravelAux\BaseService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;

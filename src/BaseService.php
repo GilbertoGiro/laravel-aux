@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Services;
+namespace LaravelAux;
 
-use App\Repository\BaseRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use LaravelAux\BaseRepository;
 use Illuminate\Support\Facades\Schema;
 
 abstract class BaseService
