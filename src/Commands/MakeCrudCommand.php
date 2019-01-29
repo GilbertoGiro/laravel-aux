@@ -45,9 +45,30 @@ class MakeCrudCommand extends Command
         $this->makeService($model);
         $this->makeRequest($model);
         $this->makeController($model);
+        $this->appendRoute($model);
 
         // Success Message
         $this->info('Vê se segue os padrões heein!');
+    }
+
+    /**
+     * Method to append Routes to api.php file (Laravel)
+     *
+     * @param $model
+     */
+    private function appendRoute($model)
+    {
+        $plural = strtolower(Str::plural($model));
+        $route = <<<EOF
+
+/*
+|--------------------------------------------------------------------------
+| {$model} Routes
+|--------------------------------------------------------------------------
+*/
+Route::resource('{$plural}', '{$model}Controller');
+EOF;
+        file_put_contents(app_path() . '/../routes/api.php', $route . PHP_EOL, FILE_APPEND | LOCK_EX);
     }
 
     /**
