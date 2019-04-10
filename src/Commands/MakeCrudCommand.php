@@ -178,7 +178,7 @@ class {$model}Repository extends BaseRepository
 {
     /**
      * UserService constructor.
-     * 
+     *
      * @param {$model} \$model
      */
     public function __construct({$model} \$model)
@@ -255,6 +255,6 @@ class Create{$plural}Table extends Migration
     }
 }
 EOF;
-        Storage::disk('database')->put('migrations/' . date('Y_m_d_His') . '_create_' . $lower . '_table.php', $migration);
+        file_put_contents(base_path() . '/database/migrations/' . date('Y_m_d_His') . '_create_' . $lower . '_table.php', $migration);
     }
 }
