@@ -1,18 +1,16 @@
 {
-    "name": "gilbertogiro/laravel-aux",
+    "name": "innovareti/laravel-aux",
     "description": "",
-    "homepage": "https://github.com/GilbertoGiro/laravel-aux",
+    "homepage": "https://github.com/innovareti/laravel-aux",
     "license": "MIT",
-    "authors": [
-        {
-            "name": "Gilberto Giro Resende",
-            "email": "gilberto.giro.resende@gmail.com",
-            "homepage": "https://github.com/GilbertoGiro",
-            "role": "Developer"
-        }
-    ],
+    "authors": [{
+        "name": "Gilberto Giro Resende",
+        "email": "gilberto.giro.resende@gmail.com",
+        "homepage": "https://github.com/GilbertoGiro",
+        "role": "Developer"
+    }],
     "require": {
-        "php" : ">=7.0",
+        "php": ">=7.0",
         "barryvdh/laravel-cors": "^0.11.0",
         "doctrine/dbal": "^2.7",
         "fideloper/proxy": "^4.0",
