@@ -176,6 +176,16 @@ abstract class BaseRepository
      *
      * @return array
      */
+    public function getGuarded()
+    {
+        return $this->model->getGuarded();
+    }
+
+    /**
+     * Method to get Model Object Attributes
+     *
+     * @return array
+     */
     public function getFillable()
     {
         return $this->model->getFillable();

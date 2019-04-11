@@ -51,6 +51,7 @@ abstract class BaseService
     protected function __construct(BaseRepository $repository)
     {
         $this->repository = $repository;
+        $this->filtersOrder = array_merge($this->repository->getGuarded(), $this->filtersOrder);
         $this->filtersOrder = array_merge($this->repository->getFillable(), $this->filtersOrder);
     }
 
@@ -161,7 +162,10 @@ abstract class BaseService
     public function update(array $data, int $id)
     {
         $elem = $this->repository->find($id);
-        return $elem->update($data);
+        if ($elem) {
+            return $elem->update($data);
+        }
+        return false;
     }
 
     /**

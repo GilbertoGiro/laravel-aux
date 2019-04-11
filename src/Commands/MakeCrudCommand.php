@@ -155,7 +155,7 @@ class {$model}Service extends BaseService
     }
 }
 EOF;
-        file_put_contents(base_path() . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . 'Services' . DIRECTORY_SEPARATOR . $model . 'Controller.php', $service);
+        file_put_contents(base_path() . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . 'Services' . DIRECTORY_SEPARATOR . $model . 'Service.php', $service);
     }
 
     /**
@@ -205,9 +205,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class {$model} extends Model
 {
-    protected \$fillable = [
+    protected \$guarded = [
         'id'
     ];
+
+    protected \$fillable = [];
 }
 EOF;
         file_put_contents(base_path() . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . 'Models' . DIRECTORY_SEPARATOR . $model . '.php', $modelContent);
