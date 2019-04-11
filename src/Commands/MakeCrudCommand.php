@@ -96,9 +96,9 @@ class {$model}Controller extends BaseController
      * @param {$service} \$service
      * @param {$request} \$request
      */
-    public function __construct({$service} \$service, {$request} \$request)
+    public function __construct({$service} \$service)
     {
-        parent::__construct(\$service, \$request);
+        parent::__construct(\$service, \$request, new {$request});
     }
 }
 EOF;
@@ -121,6 +121,43 @@ use LaravelAux\BaseRequest;
 
 class {$model}Request extends BaseRequest
 {
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array
+     */
+    public function rules()
+    {
+        return [
+            'title' => 'required',
+            'description' => 'required'
+        ];
+    }
+
+    /**
+     * Validation messages
+     *
+     * @return array
+     */
+    public function messages()
+    {
+        return [
+            'required' => ':attribute é obrigatório',
+        ];
+    }
+
+    /**
+     * Attributes Name
+     *
+     * @return array
+     */
+    public function attributes()
+    {
+        return [
+            'title' => 'Título',
+            'description' => 'Descrição'
+        ];
+    }
 }
 EOF;
         file_put_contents(base_path() . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . 'Http' . DIRECTORY_SEPARATOR . 'Requests' . DIRECTORY_SEPARATOR . $model . 'Request.php', $request);
@@ -209,7 +246,9 @@ class {$model} extends Model
         'id'
     ];
 
-    protected \$fillable = [];
+    protected \$fillable = [
+        'title', 'description'
+    ];
 }
 EOF;
         file_put_contents(base_path() . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . 'Models' . DIRECTORY_SEPARATOR . $model . '.php', $modelContent);
@@ -242,6 +281,10 @@ class Create{$plural}Table extends Migration
     {
         Schema::create('{$lower}', function (Blueprint \$table) {
             \$table->increments('id');
+            \$table->string('title');
+            \$table->string('description');
+            \$table->timestamps();
+            \$table->softDeletes();
         });
     }
 
