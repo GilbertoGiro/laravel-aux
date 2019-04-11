@@ -98,7 +98,7 @@ class {$model}Controller extends BaseController
      */
     public function __construct({$service} \$service)
     {
-        parent::__construct(\$service, \$request, new {$request});
+        parent::__construct(\$service, new {$request});
     }
 }
 EOF;
