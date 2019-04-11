@@ -123,7 +123,7 @@ class {$model}Request extends BaseRequest
 {
 }
 EOF;
-        file_put_contents(base_path() . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . 'Http' . DIRECTORY_SEPARATOR . 'Requests' . DIRECTORY_SEPARATOR . $model . 'Controller.php', $request);
+        file_put_contents(base_path() . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . 'Http' . DIRECTORY_SEPARATOR . 'Requests' . DIRECTORY_SEPARATOR . $model . 'Request.php', $request);
     }
 
     /**
