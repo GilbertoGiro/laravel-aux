@@ -3,7 +3,6 @@
 namespace LaravelAux\Commands;
 
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class MakeCrudCommand extends Command
@@ -68,7 +67,7 @@ class MakeCrudCommand extends Command
 */
 Route::resource('{$plural}', '{$model}Controller');
 EOF;
-        file_put_contents(app_path() . '/../routes/api.php', $route . PHP_EOL, FILE_APPEND | LOCK_EX);
+        file_put_contents(app_path() . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'routes' . DIRECTORY_SEPARATOR . 'api.php', $route . PHP_EOL, FILE_APPEND | LOCK_EX);
     }
 
     /**
@@ -103,7 +102,7 @@ class {$model}Controller extends BaseController
     }
 }
 EOF;
-        Storage::disk('app')->put('Http/Controllers/Api/' . $model . 'Controller.php', $controller);
+        file_put_contents(base_path() . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . 'Http' . DIRECTORY_SEPARATOR . 'Controllers' . DIRECTORY_SEPARATOR . 'Api' . DIRECTORY_SEPARATOR . $model . 'Controller.php', $controller);
     }
 
     /**
@@ -124,7 +123,7 @@ class {$model}Request extends BaseRequest
 {
 }
 EOF;
-        Storage::disk('app')->put('Http/Requests/' . $model . 'Request.php', $request);
+        file_put_contents(base_path() . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . 'Http' . DIRECTORY_SEPARATOR . 'Requests' . DIRECTORY_SEPARATOR . $model . 'Controller.php', $request);
     }
 
     /**
@@ -156,7 +155,7 @@ class {$model}Service extends BaseService
     }
 }
 EOF;
-        Storage::disk('app')->put('Services/' . $model . 'Service.php', $service);
+        file_put_contents(base_path() . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . 'Services' . DIRECTORY_SEPARATOR . $model . 'Controller.php', $service);
     }
 
     /**
@@ -187,7 +186,7 @@ class {$model}Repository extends BaseRepository
     }
 }
 EOF;
-        Storage::disk('app')->put('Repositories/' . $model . 'Repository.php', $repository);
+        file_put_contents(base_path() . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . 'Repositories' . DIRECTORY_SEPARATOR . $model . 'Repository.php', $repository);
     }
 
     /**
@@ -211,7 +210,7 @@ class {$model} extends Model
     ];
 }
 EOF;
-        Storage::disk('app')->put('Models/' . $model . '.php', $modelContent);
+        file_put_contents(base_path() . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . 'Models' . DIRECTORY_SEPARATOR . $model . '.php', $modelContent);
     }
 
     /**
@@ -255,6 +254,6 @@ class Create{$plural}Table extends Migration
     }
 }
 EOF;
-        file_put_contents(base_path() . '/database/migrations/' . date('Y_m_d_His') . '_create_' . $lower . '_table.php', $migration);
+        file_put_contents(base_path() . DIRECTORY_SEPARATOR . 'database' . DIRECTORY_SEPARATOR . 'migrations' . DIRECTORY_SEPARATOR . date('Y_m_d_His') . '_create_' . $lower . '_table.php', $migration);
     }
 }
