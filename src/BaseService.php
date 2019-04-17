@@ -102,7 +102,7 @@ abstract class BaseService
         $results = (isset($array['data'])) ? $array['data'] : $array;
 
         $this->return['data'] = (!empty($results['data'])) ? $results['data'] : $results;
-        $this->return['count'] = (empty($request->get('query'))) ? $this->repository->count() : $this->result->count();
+        $this->return['count']  = $array['total'] ?? $this->result->count();
         $this->return['filter'] = $this->result->count();
 
         return $this->return;
