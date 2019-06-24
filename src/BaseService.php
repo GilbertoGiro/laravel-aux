@@ -93,7 +93,14 @@ abstract class BaseService
                 $this->$value($filter);
             } else {
                 if ($this->columnExists($value) && array_key_exists($value, $this->request->all())) {
-                    $this->where($value, $filter);
+
+                    $type = Schema::getColumnType($this->repository->getTable(), $value);
+
+                    if (($type == 'datetime' || $type == 'date') && strpos($filter, ',') !== false) {
+                        $this->whereBetweenDate($value, $filter);
+                    } else {
+                        $this->where($value, $filter);
+                    }
                 }
             }
         }
@@ -107,6 +114,20 @@ abstract class BaseService
 
         return $this->return;
     }
+
+
+    /**
+    * Method to get Model Objects by passed Condition
+    *
+    * @param $key
+    * @param $value
+    */
+    private function whereBetweenDate($key, $value): void
+    {
+        $value = explode(',', $value);
+        $this->result = $this->result->whereRaw("date(".$key.") >= '".$value[0]."' AND date(".$key.") <= '".$value[1]."'");
+    }
+
 
     /**
      * Method to find Model Object
