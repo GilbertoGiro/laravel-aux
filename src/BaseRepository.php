@@ -2,6 +2,8 @@
 
 namespace LaravelAux;
 
+use Exception;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
 
 abstract class BaseRepository
@@ -225,15 +227,15 @@ abstract class BaseRepository
                     $query = $query->with($relation);
                     continue;
                 }
-                $query = $query->with($relation)->whereHas($relation, function ($query) use ($conditions) {
+                $query = $query->with($relation)->whereHas($relation, function ($query) use ($conditions, $relation) {
                     foreach ($conditions as $column => $condition) {
                         if (is_array($condition)) {
                             foreach ($condition as $value) {
-                                $query = $this->childrenWhere($query, $column, $value);
+                                $query = $this->childrenWhere($query, $column, $value, $relation);
                             }
                             continue;
                         }
-                        $query = $this->childrenWhere($query, $column, $condition);
+                        $query = $this->childrenWhere($query, $column, $condition, $relation);
                     }
                 });
             }
@@ -351,16 +353,35 @@ abstract class BaseRepository
      * @param $value
      * @return mixed
      */
-    private function childrenWhere($query, $key, $value)
+    private function childrenWhere($query, $key, $value, $relation = null)
     {
-        $query->where(function ($subquery) use ($query, $key, $value) {
+        $query->where(function ($subquery) use ($query, $key, $value, $relation) {
             if (is_array($value)) {
                 foreach ($value as $column => $condition) {
                     $subquery->whereRaw("LOWER({$key}) LIKE LOWER(?)", '%' . $condition . '%');
                 }
                 return $query;
             }
-            $subquery->whereRaw("LOWER({$key}) LIKE LOWER(?)", '%' . $value . '%');
+
+            if($relation){
+
+                try{
+                    $relationModel = $this->model->{$relation}(); // Returns a Relations subclass like BelongsTo or HasOne.
+                    $relatedModel = $relationModel->getRelated(); // Returns a new empty Model
+                    $tableName = $relatedModel->getTable();
+
+                    $type = DB::connection()->getDoctrineColumn($tableName, $key)->getType()->getName();
+
+                } catch(Exception $e){
+                    $type = null;
+                }
+
+                if(isset($type) && $type == 'integer'){
+                    $subquery->whereRaw($key, $value);
+                } else {
+                    $subquery->whereRaw("LOWER({$key}) LIKE LOWER(?)", '%' . $value . '%');
+                }
+            }
         });
         return $query;
     }
