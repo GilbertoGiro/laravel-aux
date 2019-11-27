@@ -37,6 +37,7 @@ abstract class BaseService
         'with',
         'withNotEmpty',
         'withEmpty',
+        'hasRelationChildren',
         'orderByAsc',
         'orderByDesc',
         'paginated',
@@ -336,6 +337,16 @@ abstract class BaseService
     private function whereNotNull($key)
     {
         $this->result = $this->result->whereNotNull($key);
+    }
+
+    /**
+     * Verify if relationship has children (at least one)
+     *
+     * @param $key
+     */
+    private function hasRelationChildren($key)
+    {
+        $this->result = $this->result->has($key);
     }
 
     /**
