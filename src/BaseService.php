@@ -38,6 +38,7 @@ abstract class BaseService
         'withNotEmpty',
         'withEmpty',
         'hasRelationChildren',
+        'orderBy',
         'orderByAsc',
         'orderByDesc',
         'paginated',
@@ -251,6 +252,16 @@ abstract class BaseService
     private function withEmpty($value): void
     {
         $this->result = $this->repository->withRelationEmpty($this->result, $value);
+    }
+
+    public function orderBy($value)
+    {
+        if($this->request->get('ascending')){
+            $this->result = $this->result->orderBy($value);
+            return;
+        }
+
+        $this->result = $this->result->orderByDesc($value);
     }
 
     /**
