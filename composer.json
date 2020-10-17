@@ -12,11 +12,10 @@
     }
   ],
   "require": {
-    "php": ">=7.2",
-    "barryvdh/laravel-cors": "^0.11.0",
+    "php": ">=7.2",    
     "doctrine/dbal": "^2.7",
     "fideloper/proxy": "^4.0",
-    "laravel/framework": "^6.0",
+    "laravel/framework": "^7.0",
     "laravel/tinker": "^1.0"
   },
   "autoload": {
