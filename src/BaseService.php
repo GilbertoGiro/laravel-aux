@@ -102,7 +102,6 @@ abstract class BaseService
                     if (($type == 'datetime' || $type == 'date') && strpos($filter, ',') !== false) {
                         $this->whereBetweenDate($value, $filter);
                     } else {
-                        $this->where($value, $filter);
                         if(is_array($filter)){
                             $this->result->whereIn($value, $filter);
                         } else {
