@@ -42,7 +42,8 @@ abstract class BaseService
         'orderByAsc',
         'orderByDesc',
         'paginated',
-        'groupBy'
+        'groupBy',
+        'whereInColumn'
     ];
 
     /**
@@ -388,5 +389,19 @@ abstract class BaseService
     private function groupBy($column): void
     {
         $this->result = $this->result->groupBy($column);
+    }
+
+    /**
+     * Method to Group Model Objects by passed column
+     *
+     * @param $column
+     */
+    private function whereInColumn($value): void
+    {
+        $string = explode('[', $value);
+        $column = $string[0];
+        $value = substr($string[1], 0, -1);
+        $value = explode(',', $value);
+        $this->result = $this->result->whereIn($column, $value);
     }
 }
