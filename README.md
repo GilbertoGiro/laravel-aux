@@ -37,3 +37,13 @@
 
     Group by any field -> will bring data grouped by the value of field (company_id)
         http://localhost:8000/api/v1/users?with[]=company&groupBy[]=company_id
+
+
+## Development
+
+Para testar tem que instalar 
+```sudo apt-get install php-sqlite3```
+
+## Teste
+
+```composer dump-autoload```
