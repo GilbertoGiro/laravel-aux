@@ -43,7 +43,8 @@ abstract class BaseService
         'orderByDesc',
         'paginated',
         'groupBy',
-        'whereInColumn'
+        'whereInColumn',
+        'encrypted'
     ];
 
     /**
@@ -325,6 +326,16 @@ abstract class BaseService
         }
 
         $this->result = $this->result->where(function ($query) use ($key, $value) {
+
+            if($encryptedProperties = $this->request->get('encrypted')){
+                foreach($encryptedProperties as $property){
+                    if($property == $key){
+                        $query->whereEncrypted($key, 'LIKE', '%' . $value . '%');
+                            return;
+                    }
+                }
+            }
+
             if (is_array($value)) {                
                 $query->whereIn($key, $value);
                 return;

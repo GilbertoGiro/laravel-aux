@@ -15,7 +15,8 @@
     "php": ">=7.4 || ^8.0",
     "fideloper/proxy": "^4.0",
     "laravel/framework": "^8.0",
-    "laravel/tinker": "^2.0"
+    "laravel/tinker": "^2.0",
+    "elgibor-solution/laravel-database-encryption": "^1.1"
   },
   "autoload": {
     "psr-4": {
